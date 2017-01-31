@@ -251,3 +251,32 @@ void CWallHealth::Off( void )
 	else
 		SetThink( &CBaseEntity::SUB_DoNothing );
 }
+
+//-------------------------------------------------------------
+// Wall mounted health kit (Decay)
+//-------------------------------------------------------------
+class CWallHealthDecay : public CWallHealth
+{
+public:
+	void Spawn();
+	void Precache(void);
+};
+
+void CWallHealthDecay::Spawn() {
+	Precache();
+
+	pev->solid = SOLID_BBOX;
+	pev->movetype = MOVETYPE_FLY;
+
+	SET_MODEL(ENT(pev), "models/health_charger_body.mdl");
+	UTIL_SetSize(pev, Vector(-16, -16, 0), Vector(16, 16, 36));
+	UTIL_SetOrigin(pev, pev->origin);
+};
+
+LINK_ENTITY_TO_CLASS(item_healthcharger, CWallHealthDecay)
+
+void CWallHealthDecay::Precache(void)
+{
+	PRECACHE_MODEL("models/health_charger_body.mdl");
+	PRECACHE_MODEL("models/health_charger_both.mdl");
+}
