@@ -201,11 +201,11 @@ void CMonsterMaker::MakeMonster( void )
 	}
 	
 	if (!FStringNull(m_originName) && !m_originCount) {
-		ALERT(at_console, "Searching for origin entities %s\n", STRING(m_originName));
+		//ALERT(at_console, "Searching for origin entities %s\n", STRING(m_originName));
 		CBaseEntity* pOriginEntity = NULL;
 		int i = 0;
 		while( i < MONSTERMAKER_ORIGIN_MAX_COUNT && (pOriginEntity = UTIL_FindEntityByTargetname(pOriginEntity, STRING(m_originName))) != NULL) {
-			ALERT(at_console, "Found origin entity %d\n", i);
+			//ALERT(at_console, "Found origin entity %d\n", i);
 			m_cachedOrigins[i].entity = pOriginEntity;
 			TraceResult tr;
 			UTIL_TraceLine( pOriginEntity->pev->origin, pOriginEntity->pev->origin - Vector( 0, 0, 2048 ), ignore_monsters, ENT( pOriginEntity->pev ), &tr );
@@ -213,7 +213,7 @@ void CMonsterMaker::MakeMonster( void )
 			i++;
 		}
 		if (i) {
-			ALERT(at_console, "Origin count: %d\n", i);
+			//ALERT(at_console, "Origin count: %d\n", i);
 			m_originCount = i;
 		} else {
 			m_originCount = -1; //don't build cache again
@@ -311,7 +311,7 @@ void CMonsterMaker::MakeMonster( void )
 			}
 		}
 		if (foundPlayer) {
-			pevCreate->angles.y = UTIL_VecToYaw(foundPlayer->pev->origin - pev->origin);
+			pevCreate->angles.y = UTIL_VecToYaw(foundPlayer->pev->origin - chosenOriginEntity->pev->origin);
 		}
 	}
 	if (m_iMaxRandomAngleDeviation) {
