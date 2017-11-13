@@ -604,7 +604,10 @@ public:
 	void Reload( void );
 	void WeaponIdle( void );
 
+	void WeaponTick(void);
+
 	int m_fInZoom; // don't save this
+	float m_flUnzoomTime;
 
 	virtual BOOL UseDecrement( void )
 	{ 
