@@ -335,3 +335,97 @@ class CItemLongJump : public CItem
 };
 
 LINK_ENTITY_TO_CLASS( item_longjump, CItemLongJump )
+
+class CEyeScanner : public CBaseAnimating
+{
+public:
+	void Spawn();
+	void Precache(void);
+	void Think();
+	int ObjectCaps( void ) { return CBaseAnimating::ObjectCaps() | FCAP_IMPULSE_USE; }
+	void Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
+	void SetActivity(Activity NewActivity);
+
+	virtual int Save( CSave &save );
+	virtual int Restore( CRestore &restore );
+
+	static TYPEDESCRIPTION m_SaveData[];
+
+	Activity m_Activity;
+};
+
+TYPEDESCRIPTION CEyeScanner::m_SaveData[] =
+{
+	DEFINE_FIELD( CEyeScanner, m_Activity, FIELD_INTEGER ),
+};
+
+IMPLEMENT_SAVERESTORE( CEyeScanner, CBaseAnimating )
+
+LINK_ENTITY_TO_CLASS( item_eyescanner, CEyeScanner )
+
+void CEyeScanner::SetActivity( Activity NewActivity )
+{
+	int iSequence;
+
+	iSequence = LookupActivity( NewActivity );
+
+	// Set to the desired anim, or default anim if the desired is not present
+	if( iSequence > -1 )
+	{
+		if( pev->sequence != iSequence || !m_fSequenceLoops )
+		{
+			// don't reset frame between walk and run
+			if( !( m_Activity == ACT_WALK || m_Activity == ACT_RUN ) || !( NewActivity == ACT_WALK || NewActivity == ACT_RUN ) )
+				pev->frame = 0;
+		}
+
+		pev->sequence = iSequence;	// Set to the reset anim (if it's there)
+		ResetSequenceInfo();
+	}
+	else
+	{
+		ALERT( at_aiconsole, "%s has no sequence for act:%d\n", STRING( pev->classname ), NewActivity );
+		pev->sequence = 0;
+	}
+
+	m_Activity = NewActivity;
+}
+
+void CEyeScanner::Spawn()
+{
+	Precache();
+	pev->solid = SOLID_NOT;
+	pev->movetype = MOVETYPE_NONE;
+	pev->takedamage = DAMAGE_NO;
+	pev->health = 1;
+
+	SET_MODEL(ENT(pev), "models/scientist.mdl");
+	UTIL_SetOrigin(pev, pev->origin);
+	UTIL_SetSize(pev, Vector(-12, -12, 32), Vector(12, 12, 72));
+	SetActivity(ACT_IDLE);
+	ResetSequenceInfo();
+}
+
+void CEyeScanner::Precache()
+{
+	PRECACHE_MODEL("models/scientist.mdl");
+	SetActivity( m_Activity );
+}
+
+void CEyeScanner::Think()
+{
+	if (m_fSequenceFinished) {
+		SetActivity(ACT_IDLE);
+	} else {
+		StudioFrameAdvance();
+	}
+	pev->nextthink = gpGlobals->time + 0.1;
+}
+
+void CEyeScanner::Use(CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value)
+{
+	if (m_Activity == ACT_IDLE) {
+		SetActivity( ACT_MELEE_ATTACK1 );
+		pev->nextthink = gpGlobals->time + 0.1;
+	}
+}
