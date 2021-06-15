@@ -1,0 +1,18 @@
+name: freebsd-build
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: macos-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Build on FreeBSD
+      id: hlsdk-freebsd
+      uses: vmactions/freebsd-vm@v0.1.4
+      with:
+        usesh: true
+        prepare: pkg install -y cmake clang clang++
+        run: |
+          cmake -B build -S . -DCMAKE_EXE_LINKER_FLAGS="-Wl,--no-undefined"
+          cmake --build build --target all
